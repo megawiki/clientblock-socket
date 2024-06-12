@@ -22,7 +22,7 @@ wss.on('connection', ws => {
         sendCommand(ws.host,json.host,json.command)
         break;
       case 3:
-        ws.send(JSON.stringify({clients: [...wss.clients].map(i=>i.host)}))
+        ws.send(JSON.stringify({clients: [...wss.clients].filter(i=>i.host!=ws.host).map(i=>i.host)}))
         break;
     }
 
@@ -37,6 +37,10 @@ wss.on('connection', ws => {
     closeSocket(ws,"Aborted connection: Didn't receive Pong message")
   }, 5000);},600000)
   //console.log(`initialized connection. host ${ws.}`)
+})
+
+wss.on("close", ws=> {
+    console.log(`Socket closed with host ${ws.host}`)
 })
 
 function sendCommand(host,addr,message) {
