@@ -9,26 +9,26 @@ wss.on('connection', ws => {
     if (!ws.host) closeSocket(ws,"Aborted connection: No host provided")
   }, 10000);
 
-  ws.on('message', message => {
-    if (ws.pingId!=0 && message=="PONG") {clearTimeout(ws.pingId);ws.pingId=0; return}
-    var json = JSON.parse(message)
-    switch(json.opt) {
-      case 1:
-        if ([...wss.clients].some(i=>i.host===json.host)) { closeSocket(ws,"Aborted connection: Host already present"); return }
-        ws.host = json.host;
-        console.log(`Registered ${ws.type} with host ${ws.host}`)
-        break;
-      case 2:
-        sendCommand(ws.host,json.host,json.message)
-        break;
-      case 3:
-        ws.send(JSON.stringify({clients: [...wss.clients].filter(i=>i.host!=ws.host).map(i=>i.host)}))
-        ws.ping();
-        break;
-    }
-
-//    if ([...wss.clients].some(i=>i.host==json.host)) {ws.close(); return}
-  })
+    ws.on('message', message => {
+        if (ws.pingId!=0 && message=="PONG") {clearTimeout(ws.pingId);ws.pingId=0; return}
+        try {
+            var json = JSON.parse(message)
+            switch(json.opt) {
+              case 1:
+                if ([...wss.clients].some(i=>i.host===json.host)) { closeSocket(ws,"Aborted connection: Host already present"); return }
+                ws.host = json.host;
+                console.log(`Registered ${ws.type} with host ${ws.host}`)
+                break;
+              case 2:
+                sendCommand(ws.host,json.host,json.message)
+                break;
+              case 3:
+                ws.send(JSON.stringify({clients: [...wss.clients].filter(i=>i.host!=ws.host).map(i=>i.host)}))
+                ws.ping();
+                break;
+            }
+        } catch (err) {if (err instanceof SyntaxError) ws.send(JSON.stringify({error:"Bad JSON"}));}
+    })
 
   ws.pingIv = setInterval(()=> {
   ws.send("PING");
