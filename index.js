@@ -19,7 +19,7 @@ wss.on('connection', ws => {
         console.log(`Registered ${ws.type} with host ${ws.host}`)
         break;
       case 2:
-        sendCommand(ws.host,json.host,json.command)
+        sendCommand(ws.host,json.host,json.message)
         break;
       case 3:
         ws.send(JSON.stringify({clients: [...wss.clients].filter(i=>i.host!=ws.host).map(i=>i.host)}))
