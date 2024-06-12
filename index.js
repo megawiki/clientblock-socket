@@ -20,14 +20,16 @@ wss.on('connection', ws => {
                 console.log(`Registered ${ws.type} with host ${ws.host}`)
                 break;
               case 2:
-                sendCommand(ws.host,json.host,json.message)
+                sendCommand(ws,json.host,json.message)
                 break;
               case 3:
                 ws.send(JSON.stringify({clients: [...wss.clients].filter(i=>i.host!=ws.host).map(i=>i.host)}))
-                ws.ping();
+                break;
+              default:
+                sendError(ws,"Operation not found")
                 break;
             }
-        } catch (err) {if (err instanceof SyntaxError) ws.send(JSON.stringify({error:"Bad JSON"}));}
+        } catch (err) {if (err instanceof SyntaxError) sendError(ws,"Bad JSON");}
     })
 
   ws.pingIv = setInterval(()=> {
@@ -42,15 +44,21 @@ wss.on("close", ws=> {
     console.log(`Socket closed with host ${ws.host}`)
 })
 
-function sendCommand(host,addr,message) {
+function sendCommand(ws,addr,message) {
+  let bl;
   wss.clients.forEach((client) => {
-    if (client.host===addr) { client.send(`{"client":"${host}","message":"${message}"}`);return}
+    if (client.host===addr) { client.send(`{"client":"${ws.host}","message":"${message}"}`);bl=true;return}
   })
-}
+  if (!bl) sendError(ws,"Host not found")
+} 
 
 function closeSocket(ws,s) {
   clearInterval(ws.pingIv)
   clearInterval(ws.hostCheck)
   ws.close();
   console.log(s)
+}
+
+function sendError(ws,err) {
+  ws.send(JSON.stringify({error:err}))
 }
