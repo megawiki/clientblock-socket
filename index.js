@@ -23,13 +23,12 @@ wss.on('connection', ws => {
         break;
       case 3:
         ws.send(JSON.stringify({clients: [...wss.clients].filter(i=>i.host!=ws.host).map(i=>i.host)}))
+        ws.ping();
         break;
     }
 
 //    if ([...wss.clients].some(i=>i.host==json.host)) {ws.close(); return}
   })
-
-  ws.ping();
 
   ws.pingIv = setInterval(()=> {
   ws.send("PING");
