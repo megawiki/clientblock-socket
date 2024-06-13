@@ -36,7 +36,7 @@ wss.on('connection', ws => {
   ws.send("PING");
   ws.pingId=setTimeout(() => {
     closeSocket(ws,"Didn't receive Pong message")
-  }, 5000);},600000)
+  }, 5000);},60000)
   //console.log(`initialized connection. host ${ws.}`)
 })
 
