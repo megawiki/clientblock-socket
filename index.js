@@ -6,7 +6,7 @@ const wss = new WebSocket.Server({ port: PORT })
 wss.on('connection', ws => {
 
   ws.hostCheck = setTimeout(() => {
-    if (!ws.host) closeSocket(ws,"Aborted connection: No host provided")
+    if (!ws.host) closeSocket(ws,"No host provided")
   }, 10000);
 
     ws.on('message', message => {
@@ -15,7 +15,7 @@ wss.on('connection', ws => {
             var json = JSON.parse(message)
             switch(json.opt) {
               case 1:
-                if ([...wss.clients].some(i=>i.host===json.host)) { closeSocket(ws,"Aborted connection: Host already present"); return }
+                if ([...wss.clients].some(i=>i.host===json.host)) { closeSocket(ws,"Host already present"); return }
                 ws.host = json.host;
                 console.log(`Registered ${ws.type} with host ${ws.host}`)
                 break;
@@ -35,7 +35,7 @@ wss.on('connection', ws => {
   ws.pingIv = setInterval(()=> {
   ws.send("PING");
   ws.pingId=setTimeout(() => {
-    closeSocket(ws,"Aborted connection: Didn't receive Pong message")
+    closeSocket(ws,"Didn't receive Pong message")
   }, 5000);},600000)
   //console.log(`initialized connection. host ${ws.}`)
 })
@@ -55,8 +55,8 @@ function sendCommand(ws,addr,message) {
 function closeSocket(ws,s) {
   clearInterval(ws.pingIv)
   clearInterval(ws.hostCheck)
-  ws.close();
-  console.log(s)
+  ws.close(s);
+  console.log(`Aborted connection: ${s}`)
 }
 
 function sendError(ws,err) {
